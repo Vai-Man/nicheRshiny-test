@@ -8,8 +8,6 @@ A straightforward R script (`easy/easy-test.R`) that:
 - Computes statistics (min, max, mean, std)
 - Generates static plots for global and cropped views
 
-**Use Case:** Quick prototyping and simple analysis workflows.
-
 ### Medium Test
 An interactive Shiny application (`medium/medium-test.R`) that:
 - Provides a user-friendly web interface with tabbed output visualization
@@ -18,7 +16,6 @@ An interactive Shiny application (`medium/medium-test.R`) that:
 - Displays progress tracking during data processing
 - Shows results across four tabs: Global, Cropped, Masked, and Statistics
 
-**Use Case:** Interactive exploration with caching efficiency and enhanced data processing.
 
 ## Dependencies
 
