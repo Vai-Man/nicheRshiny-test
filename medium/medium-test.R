@@ -23,14 +23,7 @@ ui <- fluidPage(
 
 server <- function(input, output, session) {
   
-  cached_data <- reactiveVal(NULL)
-  
   workflow_data <- eventReactive(input$run_workflow, {
-    
-    if (!is.null(cached_data())) {
-      return(cached_data())
-    }
-    
     withProgress(message = "Running workflow...", value = 0, {
       
       local_cache <- file.path(getwd(), "geodata_cache")
@@ -47,17 +40,17 @@ server <- function(input, output, session) {
       bio1_cropped <- crop(bio1_global, sa_bbox)
       
       incProgress(0.3, detail = "Step 3: Loading boundaries")
-      sa_continent_file <- file.path(cache_path, "south_america_continent.rds")
+      sa_continent_file <- file.path(cache_path, "south_america_continent.gpkg")
       
       if (file.exists(sa_continent_file)) {
-        sa_polygons <- readRDS(sa_continent_file)
+        sa_polygons <- terra::vect(sa_continent_file)
       } else {
         sa_countries <- c("ARG","BOL","BRA","CHL","COL","ECU","GUF","GUY","PRY","PER","SUR","URY","VEN")
         polys_list <- lapply(sa_countries, function(code) {
           geodata::gadm(code, level = 0, path = cache_path)
         })
         sa_polygons <- aggregate(do.call(rbind, polys_list))
-        saveRDS(sa_polygons, sa_continent_file)
+        terra::writeVector(sa_polygons, sa_continent_file, overwrite = TRUE)
       }
       
       incProgress(0.7, detail = "Step 4: CRS alignment")
@@ -71,15 +64,12 @@ server <- function(input, output, session) {
       incProgress(0.95, detail = "Step 6: Statistics")
       stats <- global(bio1_masked, fun = c("min","max","mean","sd"), na.rm = TRUE)
       
-      result <- list(
+      list(
         bio1_global = bio1_global,
         bio1_cropped = bio1_cropped,
         bio1_masked = bio1_masked,
         stats = stats
       )
-      
-      cached_data(result)
-      result
     })
   })
   
